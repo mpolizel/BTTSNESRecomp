@@ -39,6 +39,7 @@ include(${SNESRECOMP_ROOT}/runner/runner.cmake)
 add_executable(BattletoadsInBattlemaniacsSNESRecomp
     ${SNESRECOMP_RUNNER_SOURCES}
     src/main.c
+    src/bt_update.c
     src/host_contract.c
     src/game_rtl.c
     src/gen_stubs.c
@@ -99,6 +100,32 @@ snesrecomp_target_sdl(BattletoadsInBattlemaniacsSNESRecomp)
 # hooks; the host is the framework's and improves on a submodule pull.
 # Add TIER2 once this port reads the interpreter-gap manifest after each run.
 snesrecomp_target_desktop_host(BattletoadsInBattlemaniacsSNESRecomp)
+# Windows: a window app, so no console opens beside the game; diagnostics go
+# to BattletoadsInBattlemaniacsSNESRecomp.log (src/main.c). -DBT_CONSOLE=ON brings the
+# console back for debugging.
+option(BT_CONSOLE "Build the Windows executable with a console window" OFF)
+if(WIN32)
+    if(BT_CONSOLE)
+        target_compile_definitions(BattletoadsInBattlemaniacsSNESRecomp PRIVATE BT_CONSOLE=1)
+    else()
+        set_target_properties(BattletoadsInBattlemaniacsSNESRecomp PROPERTIES WIN32_EXECUTABLE TRUE)
+        if(MSVC)
+            # Keep the portable main() entry point instead of WinMain.
+            target_link_options(BattletoadsInBattlemaniacsSNESRecomp PRIVATE /ENTRY:mainCRTStartup)
+        endif()
+    endif()
+endif()
+# Shader presets for the launcher's Shader list: the framework's built-ins plus
+# the curated libretro scanline/CRT/upscaler set in assets/shaders (refreshed
+# by tools/import_libretro_shaders.py).
+snesrecomp_target_shader_presets(BattletoadsInBattlemaniacsSNESRecomp)
+file(GLOB_RECURSE BT_SHADER_FILES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/assets/shaders/*")
+set_property(TARGET BattletoadsInBattlemaniacsSNESRecomp APPEND PROPERTY LINK_DEPENDS ${BT_SHADER_FILES})
+add_custom_command(TARGET BattletoadsInBattlemaniacsSNESRecomp POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets/shaders"
+        "$<TARGET_FILE_DIR:BattletoadsInBattlemaniacsSNESRecomp>/assets/shaders"
+    COMMENT "BattletoadsInBattlemaniacsSNESRecomp: staging libretro shader presets" VERBATIM)
 # rom.cfg (the ROM the wizard set this project up from; git-ignored) is
 # staged beside the executable when none is there yet, so the first launch
 # opens on that dump rather than asking for one.
