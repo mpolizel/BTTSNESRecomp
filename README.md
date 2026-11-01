@@ -71,6 +71,10 @@ Donkey Kong Country ports (the same Rare engine pattern): the NMI handler
 resets the stack, runs the game and falls into a `WAI / BRA` idle loop
 (`$80:86C2`) instead of returning with RTI. Without the patch that loop ran to
 the interpreter's step cap and the game froze on the player-select screen.
+The handler is then the game's main program, so raster IRQs interrupt it as
+they would the main loop: the HUD split (IRQ at line 33) used to wait for the
+game logic to finish, and in busy scenes drew a band of HUD tiles over the
+level.
 
 `snesrecomp-opt-bg3-row.patch` fixes offset-per-tile (BG mode 2). The PPU read
 the BG3 offset map one line above BG3VOFS, which at VOFS 0 is the last row of

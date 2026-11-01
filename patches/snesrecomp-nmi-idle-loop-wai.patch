@@ -14,7 +14,7 @@ index d6086b35..d5c4feea 100644
  
    /* Run out the field, taking each interrupt at the beam position it latches
 diff --git a/runner/src/snes/interp_bridge.c b/runner/src/snes/interp_bridge.c
-index af45ff14..27dd0ea3 100644
+index af45ff14..bc4a26a9 100644
 --- a/runner/src/snes/interp_bridge.c
 +++ b/runner/src/snes/interp_bridge.c
 @@ -1728,9 +1728,18 @@ static int _interp_run_core(CpuState *cpu, uint32_t entry_pc24,
@@ -36,7 +36,22 @@ index af45ff14..27dd0ea3 100644
          /* Settle the DRAM refresh tax owed by clocks generated code charged
           * after its last per-block settlement: the interpreter settles after
           * each of its own opcodes, so without this the first interpreted step
-@@ -1807,7 +1816,10 @@ static int _interp_run_core(CpuState *cpu, uint32_t entry_pc24,
+@@ -1790,8 +1799,12 @@ static int _interp_run_core(CpuState *cpu, uint32_t entry_pc24,
+          * program run must return to its owning scheduler as soon as either
+          * the CPU H/V comparator or a coprocessor asserts IRQ; otherwise a
+          * perfectly live hardware-poll loop can monopolize the bridge and
+-         * starve the handler forever. */
+-        if (auto_quiescent && steps && !in.i && g_snes &&
++         * starve the handler forever. A handler that abandoned its frame is
++         * that program now: Battletoads in Battlemaniacs runs its game logic
++         * in NMI with I clear, and its line-33 IRQ (the HUD split) waited for
++         * the logic to reach WAI, so heavy fields drew the HUD's lower rows
++         * over the level. */
++        if ((auto_quiescent || handler_frame_discarded) && steps && !in.i && g_snes &&
+             (g_snes->inIrq ||
+              (g_snes->cart && g_snes->cart->superfx &&
+               g_snes->cart->superfx->irq_pending) ||
+@@ -1807,7 +1820,10 @@ static int _interp_run_core(CpuState *cpu, uint32_t entry_pc24,
              bridge_apu_flush(cpu);
              return 1;
          }
@@ -48,7 +63,7 @@ index af45ff14..27dd0ea3 100644
              cpu->master_cycles >= s_lle_master_deadline) {
              lle_resume_set(pc_before, INTERP_RESUME_SITE_DEADLINE, in.sp);
              sync_interp_to_cpu(&in,cpu);
-@@ -2808,10 +2820,14 @@ static int _interp_run_core(CpuState *cpu, uint32_t entry_pc24,
+@@ -2808,10 +2824,14 @@ static int _interp_run_core(CpuState *cpu, uint32_t entry_pc24,
           * restore the old hook before the custom NMI can run (Metal Warriors
           * LucasArts logo at $00:B7A3). Resume PC is the instruction after WAI.
           * Only yield from scheduler/quiescent runs — never from a host
