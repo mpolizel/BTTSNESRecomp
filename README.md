@@ -89,6 +89,7 @@ Reapply them after updating the submodules:
 
 ```sh
 git -C snesrecomp apply ../patches/snesrecomp-nmi-idle-loop-wai.patch
+git -C snesrecomp apply ../patches/snesrecomp-nmi-wai-in-handler.patch
 git -C snesrecomp apply ../patches/snesrecomp-opt-bg3-row.patch
 git -C snesrecomp apply ../patches/snesrecomp-raster-oam-and-hdma.patch
 git -C snesrecomp apply ../patches/snesrecomp-audio-interpolation.patch
@@ -106,6 +107,12 @@ The handler is then the game's main program, so raster IRQs interrupt it as
 they would the main loop: the HUD split (IRQ at line 33) used to wait for the
 game logic to finish, and in busy scenes drew a band of HUD tiles over the
 level.
+
+`snesrecomp-nmi-wai-in-handler.patch` makes any `WAI` inside an interrupt
+handler halt until the next interrupt, as on hardware. Here a scene change
+ends in `WAI / BRA` at `$80:8DF5` while still inside NMI; the interpreter
+skipped the `WAI` and spun to its step cap, costing that frame. In Donkey Kong
+Country (same Rare engine) the same case after saving left the screen black.
 
 `snesrecomp-opt-bg3-row.patch` fixes offset-per-tile (BG mode 2). The PPU read
 the BG3 offset map one line above BG3VOFS, which at VOFS 0 is the last row of

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 — 2026-11-03
+
+### Fixed
+- A stall at a scene change, where the game's wait for the next frame inside
+  its video interrupt was skipped. In Donkey Kong Country (same engine) the
+  same case left the screen black after saving.
+
 ## 0.1.2 — 2026-11-02
 
 ### New
