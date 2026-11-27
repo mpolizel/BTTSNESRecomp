@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.9 — 2026-11-27
+
+MSU-1 music, chosen in the launcher's Settings (new EXTRAS card): pick the
+folder holding Conn's MSU-1 patch (btbm_msu.ips) and a pack's
+btbm_msu1-<N>.pcm tracks, and the game plays the pack instead of the
+cartridge's music. The patch is checked by its SHA-256 and the card says
+whether it and the tracks are recognized. The ROM file is never changed: the
+patch is applied to the ROM in memory after it passed its check. With MSU-1
+off nothing changes. Your saves and save states keep loading.
+
 ## 0.1.8 — 2026-11-24
 
 A ROM that is not the dump this game needs is now refused with a clear message

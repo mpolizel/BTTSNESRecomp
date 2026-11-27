@@ -40,6 +40,7 @@ add_executable(BattletoadsInBattlemaniacsSNESRecomp
     ${SNESRECOMP_RUNNER_SOURCES}
     src/main.c
     src/bt_update.c
+    src/bt_extras.c
     src/host_contract.c
     src/game_rtl.c
     src/gen_stubs.c

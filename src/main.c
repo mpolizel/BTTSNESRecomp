@@ -44,6 +44,7 @@
 
 #include "config.h"
 #include "bt_update.h"
+#include "bt_extras.h"
 #include <string.h>
 
 #ifdef RECOMP_LAUNCHER
@@ -53,6 +54,7 @@
 static void BtConfigureLauncher(RecompLauncherCGameInfo *info)
 {
     info->renderer_note = "Shaders need OpenGL: choosing one switches the renderer to OpenGL.";
+    BtExtrasConfigureLauncher(info);
 #ifdef _WIN32
     info->host_toggle_label = "Check for updates on start";
     info->host_toggle_help =
@@ -136,6 +138,9 @@ static const SnesDesktopHostGame kGameHost = {
     .num_players         = 2,
     .shader_supported    = 1,
     .after_config        = BtAfterConfig,
+    /* MSU-1 pack chosen in the launcher, applied in memory: see bt_extras.c. */
+    .replace_rom         = BtReplaceRom,
+    .on_reset            = BtExtrasOnReset,
 #ifdef RECOMP_LAUNCHER
     .configure_launcher  = BtConfigureLauncher,
 #endif

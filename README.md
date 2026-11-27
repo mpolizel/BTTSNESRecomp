@@ -68,6 +68,27 @@ the game asks the driver for the dedicated one. If it still runs slowly,
 set the game's executable to **High performance** in Windows Settings →
 System → Display → Graphics.
 
+### MSU-1 music
+
+The launcher's **Settings** page has an **EXTRAS** card with an **MSU-1
+music** option: it plays an MSU-1 pack, a CD-quality soundtrack, instead of
+the cartridge's music. Press **Browse** and choose the folder holding Conn's
+MSU-1 patch (`btbm_msu.ips`, from his `btbm_msu1_patch.zip`; the SD2SNES
+variant `btbm_msu1_sd2snes.ips` works too) and the pack's `btbm_msu1-0.pcm`
+... `btbm_msu1-23.pcm` tracks. Packs are shared on the
+[Zeldix forum](https://www.zeldix.net/t1470-msu1-file-links). Neither is
+included here: you bring your own, as with the ROM.
+
+The patch is checked by its SHA-256 when you choose the folder, and the card
+says at once whether the patch and the tracks are recognized. Your ROM file
+is never changed: when the game starts, after the ROM passes its own check,
+the patch is applied to the copy in memory. To silence the cartridge's music
+the patch sets the game's sound option to OFF, so the options screen shows
+OFF while MSU-1 is on. With MSU-1 off the game is exactly as before. The
+choice is kept in `build\extras.ini`; a change made from the in-game
+launcher applies the next time the game starts. After a save state or rewind
+is loaded, the track starts over from its beginning.
+
 ### Updates
 
 With **Check for updates on start** ticked (the default; on the launcher's main
@@ -123,7 +144,9 @@ git -C snesrecomp apply ../patches/snesrecomp-state-load-raster-reset.patch
 git -C snesrecomp apply ../patches/snesrecomp-v10-savestates.patch
 git -C snesrecomp apply ../patches/snesrecomp-x-rewind-hotkey.patch
 git -C snesrecomp apply ../patches/snesrecomp-x-rom-gate.patch
+git -C snesrecomp apply ../patches/snesrecomp-x-rom-replace.patch
 git -C recomp-ui apply ../patches/recomp-ui-host-toggle.patch
+git -C recomp-ui apply ../patches/recomp-ui-x-host-extras.patch
 ```
 
 `snesrecomp-nmi-idle-loop-wai.patch` is required for this game, as for the
@@ -231,6 +254,13 @@ turns that back on). Without those arguments and variables nothing changes.
 
 `recomp-ui-host-toggle.patch` lets a title add one checkbox of its own beside
 "Skip launcher on boot"; this project uses it for the update check.
+
+`recomp-ui-x-host-extras.patch` adds an EXTRAS card to the launcher's
+Settings for title-owned options that need a file or a folder (checkbox,
+Browse, the chosen path and a status line);
+`snesrecomp-x-rom-replace.patch` lets a title hand the host a different ROM
+image after the verified ROM was read (`SnesDesktopHostGame.replace_rom`).
+This project uses both for MSU-1 packs (`src/bt_extras.c`).
 
 ## ROM identity
 
